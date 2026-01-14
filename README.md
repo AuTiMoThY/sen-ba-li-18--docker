@@ -4,9 +4,30 @@
 
 ## 📋 目錄
 
-1. [運行專案](#運行專案)
-2. [遷移專案](#遷移專案)
+1. [遷移專案](#遷移專案)
+2. [運行專案](#運行專案)
 3. [vscode出現類型檢查問題](#vscode出現類型檢查問題)
+
+---
+
+## 遷移專案
+
+### 1、建立新專案
+
+在新專案資料夾中執行
+`git clone https://github.com/AuTiMoThY/sen-ba-li-18--docker.git new-project`
+<br>
+( new-project 替換成新專案名稱 )
+
+### 2、修改容器名稱 container_name
+
+檔案
+- `compose.yaml`
+
+### 3、修改 port ( 若有需要 )
+
+檔案
+- `.env`
 
 ---
 
@@ -88,27 +109,6 @@ docker build --target build --file Dockerfile . -t my-app:build
 # 2. 運行容器並掛載當前目錄（使用 %CD%）
 docker run --rm -v "%CD%\dist:/app/dist" my-app:build sh -c "pnpm run build"
 ```
-
----
-
-## 遷移專案
-
-### 1、建立新專案
-
-在新專案資料夾中執行
-`git clone D:\_au\projects\20260108--sen-ba-li-18\sen-ba-li-18--docker new-project`
-<br>
-( new-project 替換成新專案名稱 )
-
-### 2、修改容器名稱 container_name
-
-檔案
-- `compose.yaml`
-
-### 3、修改 port ( 若有需要 )
-
-檔案
-- `.env`
 
 ---
 
