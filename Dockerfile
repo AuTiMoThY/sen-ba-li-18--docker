@@ -38,8 +38,9 @@ COPY package.json pnpm-lock.yaml ./
 # 複製專案檔案
 COPY . .
 
-# 暴露 Vite 開發伺服器端口
-EXPOSE 5173
+# 暴露 Vite 開發伺服器端口（使用 ARG 允許動態設定）
+ARG VITE_DEV_PORT=5173
+EXPOSE ${VITE_DEV_PORT}
 
 # 開發模式命令
 CMD ["pnpm", "dev"]
@@ -78,7 +79,7 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # 複製 nginx 配置（可選，如果需要自訂配置）
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# 暴露端口
+# 暴露端口（nginx 容器內部固定為 80，主機端口可在 compose.yaml 中設定）
 EXPOSE 80
 
 # 啟動 nginx

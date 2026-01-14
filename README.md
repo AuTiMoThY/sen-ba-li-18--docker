@@ -12,30 +12,51 @@
 
 ## 運行專案
 
-### 1：檢查 Docker 安裝
+### 1、檢查 Docker 安裝
 
 ```bash
 docker --version
 docker compose version
 ```
 
-### 2：啟動開發環境
+### 2、啟動開發環境
 
 ```bash
 docker compose up --build
 ```
 
-### 3：訪問應用
+#### 該指令包含以下流程
+
+- 1. 構建映像檔
+
+```bash
+docker compose build
+```
+
+**預期結果**：構建成功，無錯誤訊息
+
+- 2. 啟動開發環境
+
+```bash
+docker compose watch
+```
+
+**預期結果**：
+- 容器成功啟動
+- 開發伺服器運行在正確端口
+- 終端顯示 Vite 啟動訊息
+
+### 3、訪問應用
 
 開啟瀏覽器訪問：**http://localhost:5173**
 
-### 4：測試熱重載
+### 4、測試熱重載
 
 1. 修改任何原始碼檔案
 2. 觀察終端日誌，應該看到重新編譯的訊息
 3. 瀏覽器應該自動重新載入
 
-### 5：生產環境 ( 產生 `dist/` 目錄 )
+### 5、生產環境 ( 產生 `dist/` 目錄 )
 
 #### 方法一：從映像檔中提取檔案（推薦，跨平台）
 
@@ -63,23 +84,24 @@ docker run --rm -v "%CD%\dist:/app/dist" my-app:build sh -c "pnpm run build"
 
 ## 遷移專案
 
-### 1：建立新專案
+### 1、建立新專案
 
 在新專案資料夾中執行
 `git clone D:\_au\projects\20260108--sen-ba-li-18\sen-ba-li-18--docker new-project`
+<br>
 ( new-project 替換成新專案名稱 )
 
-### 2：修改 port ( 若有需要 )
+### 2、修改容器名稱 container_name
+
+檔案
+- `compose.yaml`
+
+### 3、修改 port ( 若有需要 )
 
 檔案
 - `vite.config.ts`
 - `compose.yaml`
 - `Dockerfile`
-
-### 3：修改容器名稱 (container_name)
-
-檔案
-- `compose.yaml`
 
 ---
 
@@ -91,7 +113,7 @@ docker run --rm -v "%CD%\dist:/app/dist" my-app:build sh -c "pnpm run build"
 Cannot find module 'vue' or its corresponding type declarations.
 ```
 
-出現在所有導入 Vue 相關模組的地方，例如：
+該錯誤訊息出現在所有導入 Vue 相關模組的地方，例如：
 
 ```typescript
 import { onMounted, onUnmounted } from "vue";
@@ -100,6 +122,7 @@ import { onMounted, onUnmounted } from "vue";
 ### 原因
 
 VSCode 的 TypeScript 語言服務在本地運行，需要訪問本地的 `node_modules` 來解析類型定義
+<br>
 docker 容器內的依賴對本地 VSCode 不可見
 
 ### 解決方案
