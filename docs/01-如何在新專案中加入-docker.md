@@ -226,3 +226,5 @@ server: {
 
 - 閱讀 [Dockerfile 和 compose.yaml 說明](./02-dockerfile-和-compose-yaml-說明.md)
 - 了解 [Docker 運作流程](./03-docker-運作流程.md)
+- 詳細了解 [docker compose up --build 執行流程詳解](./06-docker-compose-up-執行流程詳解.md)
+- 如果已有 Docker 配置的專案，參考 [如何遷移到新專案](./05-如何遷移到新專案.md)

@@ -403,3 +403,7 @@ Docker 的運作流程可以簡化為：
 5. **管理**：透過命令管理容器的生命週期
 
 理解這個流程有助於更好地使用 Docker 和解決問題。
+
+## 延伸閱讀
+
+- 詳細了解 [docker compose up --build 執行流程詳解](./06-docker-compose-up-執行流程詳解.md)
