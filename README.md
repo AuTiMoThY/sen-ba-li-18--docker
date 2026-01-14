@@ -59,7 +59,7 @@ docker compose up --build
 
 #### 該指令包含以下流程
 
-- 1. 構建映像檔
+1. 構建映像檔
 
 ```bash
 docker compose build
@@ -67,7 +67,7 @@ docker compose build
 
 **預期結果**：構建成功，無錯誤訊息
 
-- 2. 啟動開發環境
+2. 啟動開發環境
 
 ```bash
 docker compose watch
