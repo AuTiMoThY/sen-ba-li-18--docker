@@ -46,7 +46,7 @@ docker compose version
 
 ```bash
 # 複製環境變數範例檔案
-cp .env.example .env
+copy .env.example .env
 
 # 或手動創建 .env 檔案
 ```
