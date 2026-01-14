@@ -108,9 +108,7 @@ docker run --rm -v "%CD%\dist:/app/dist" my-app:build sh -c "pnpm run build"
 ### 3、修改 port ( 若有需要 )
 
 檔案
-- `vite.config.ts`
-- `compose.yaml`
-- `Dockerfile`
+- `.env`
 
 ---
 
