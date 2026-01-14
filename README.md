@@ -57,22 +57,6 @@ copy .env.example .env
 docker compose up --build
 ```
 
-#### 該指令包含以下流程
-
-1. 構建映像檔
-
-```bash
-docker compose build
-```
-
-**預期結果**：構建成功，無錯誤訊息
-
-2. 啟動開發環境
-
-```bash
-docker compose watch
-```
-
 **預期結果**：
 - 容器成功啟動
 - 開發伺服器運行在正確端口
