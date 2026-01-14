@@ -15,7 +15,9 @@
 ### 1、建立新專案
 
 在新專案資料夾中執行
-`git clone https://github.com/AuTiMoThY/sen-ba-li-18--docker.git new-project`
+```
+git clone https://github.com/AuTiMoThY/sen-ba-li-18--docker.git new-project
+```
 <br>
 ( new-project 替換成新專案名稱 )
 
