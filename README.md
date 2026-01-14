@@ -29,7 +29,7 @@ git clone https://github.com/AuTiMoThY/sen-ba-li-18--docker.git new-project
 ### 3、修改 port ( 若有需要 )
 
 檔案
-- `.env`
+- `.env` 或 `.env.example`
 
 ---
 
