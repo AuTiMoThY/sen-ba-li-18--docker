@@ -1,0 +1,32 @@
+@use "sass:math";
+
+
+
+@function calc-vw($num, $base-width) {
+    // 四捨五入到小數點第一位
+    $rounded: math.div(math.round(math.div($num, $base-width) * 100 * 10), 10);
+    @return #{$rounded}vw;
+}
+
+@function calc-vw-without-unit($num, $base-width) {
+    @return math.div(
+        $num * 100,
+        $base-width
+    ); // 返回的是一个无单位的数，表示vw的数值
+}
+
+@function relative-percentage($num, $base-width) {
+    @return math.div($num, $base-width) * 100%;
+}
+
+@function min-calc-vw($num, $base-width) {
+    @return min(calc-vw($num, $base-width), #{$num}px);
+}
+
+@function calc-ls($value) {
+    @return #{$value * 0.001}em;
+}
+
+@function calc-lh($fz, $lh) {
+    @return math.div($lh, $fz);
+}

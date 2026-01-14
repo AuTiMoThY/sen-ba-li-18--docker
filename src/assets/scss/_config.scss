@@ -1,0 +1,44 @@
+@use "sass:string";
+@mixin laptop() {
+    @media all and (max-width: 1600px) {
+        @content;
+    }
+}
+
+@mixin laptop14() {
+    @media all and (max-width: 1440px) {
+        @content;
+    }
+}
+
+@mixin media-down($point) {
+    @media all and (max-width: #{$point}px) {
+        @content;
+    }
+}
+
+@mixin hint() {
+    position: absolute;
+    font-family: "微軟正黑體";
+    color: white;
+    font-size: 0.58vw;
+    letter-spacing: 0.1em;
+}
+
+@mixin aspect-object-cover($ratio) {
+    aspect-ratio: #{$ratio};
+    object-fit: cover;
+}
+
+@mixin flex($direction: null, $justify: null, $align: null) {
+    display: flex;
+    @if $direction {
+        flex-direction: $direction;
+    }
+    @if $justify {
+        justify-content: $justify;
+    }
+    @if $align {
+        align-items: $align;
+    }
+}

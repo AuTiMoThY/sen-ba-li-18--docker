@@ -1,0 +1,65 @@
+# Docker Compose v2 語法
+services:
+  # 開發環境服務
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development  # 使用 development 階段
+    container_name: sen-ba-li-18-dev
+    ports:
+      - "5173:5173"  # 映射 Vite 開發伺服器端口
+      # 注意：Docker Desktop 可能只顯示 http://localhost:5173
+      # 完整 URL 為：http://localhost:5173/red_heart/sen-ba-li-18/
+    volumes:
+      # 掛載專案檔案以實現熱重載
+      - .:/app
+      # 排除 node_modules，使用容器內的版本
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    stdin_open: true  # 保持標準輸入開啟（用於互動式終端）
+    tty: true  # 分配偽終端
+    restart: unless-stopped
+    # Watch 配置（Docker Compose v2.22+）
+    # 監控檔案變更並自動同步到容器
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./public
+          target: /app/public
+        - action: sync
+          path: ./index.html
+          target: /app/index.html
+        - action: sync
+          path: ./vite.config.ts
+          target: /app/vite.config.ts
+        - action: sync
+          path: ./tsconfig.json
+          target: /app/tsconfig.json
+        - action: sync
+          path: ./tsconfig.app.json
+          target: /app/tsconfig.app.json
+        - action: sync
+          path: ./tsconfig.node.json
+          target: /app/tsconfig.node.json
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./pnpm-lock.yaml
+
+  # 生產環境服務（可選）
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production  # 使用 production 階段
+    container_name: sen-ba-li-18-prod
+    ports:
+      - "80:80"  # 映射 nginx 端口
+    restart: unless-stopped
+    profiles:
+      - production  # 使用 profile 來控制何時啟動此服務
