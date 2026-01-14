@@ -372,9 +372,247 @@ sen-ba-li-18-dev  |   ➜  Network: http://172.19.0.2:5173/
 
 **用途**：啟動已創建的容器
 
+**重要**：當容器啟動時，會執行 Dockerfile 中的 `CMD` 指令。在這個專案中：
+- `CMD ["pnpm", "dev"]` 會在容器啟動時執行
+- 這對應到 `package.json` 中的 `"dev": "vite"` 腳本
+- 因此 `pnpm run dev` 是在容器啟動時執行的，不是構建時
+
 ### docker attach
 
 **用途**：附加到運行中容器的標準輸出
+
+## 關鍵問題：`pnpm run dev` 和 `pnpm run build` 何時執行？
+
+### `pnpm run build` 的執行時機
+
+**執行時機**：構建映像檔時（`docker build`）
+
+**Dockerfile 位置**：
+```dockerfile
+# 第 68 行，在 build 階段
+RUN pnpm run build
+```
+
+**對應的 Docker 指令**：
+```bash
+# 在執行 docker build 時，會執行這個 RUN 指令
+docker build --target build --file Dockerfile .
+```
+
+**注意**：`docker build` 命令必須包含構建上下文（最後的 `.`），這是必需的參數。
+
+**說明**：
+- 這是在構建映像檔的過程中執行的
+- 屬於 `build` 階段的一部分
+- 執行時會在**容器內部**產生 `dist/` 目錄
+- 產物會被複製到 `production` 階段
+
+**重要**：`dist/` 目錄是在容器內部產生的，**不會自動出現在主機上**。如果需要在主機上看到 `dist/` 目錄，需要額外操作（見下方說明）。
+
+**實際流程**：
+```
+docker build --target build --file Dockerfile .
+  ↓
+執行 Dockerfile 的 build 階段
+  ↓
+執行 RUN pnpm run build（第 68 行）
+  ↓
+在容器內部產生 dist/ 目錄
+  ↓
+構建完成（dist/ 包含在映像檔中，但不在主機上）
+```
+
+**注意**：
+- `docker build` 命令必須包含構建上下文（通常是 `.` 表示當前目錄），否則會報錯
+- `dist/` 目錄是在容器內部產生的，**不會自動複製到主機**
+- 如果需要在主機上看到 `dist/` 目錄，見下方「如何從容器中提取 dist/ 目錄」
+
+### `pnpm run dev` 的執行時機
+
+**執行時機**：容器啟動時（`docker start` 或 `docker run`）
+
+**Dockerfile 位置**：
+```dockerfile
+# 第 45 行，在 development 階段
+CMD ["pnpm", "dev"]
+```
+
+**對應的 Docker 指令**：
+```bash
+# 當容器啟動時，會執行這個 CMD
+docker start sen-ba-li-18-dev
+# 或
+docker run sen-ba-li-18-docker-app:latest
+```
+
+**說明**：
+- 這是在容器啟動時執行的，不是構建時
+- `CMD` 指令定義了容器的預設啟動命令
+- 當容器啟動後，會執行 `pnpm dev`，啟動 Vite 開發伺服器
+- 這對應到 `package.json` 中的 `"dev": "vite"` 腳本
+
+**實際流程**：
+```
+docker start sen-ba-li-18-dev
+  ↓
+容器啟動
+  ↓
+執行 CMD ["pnpm", "dev"]（第 45 行）
+  ↓
+執行 pnpm dev → vite
+  ↓
+Vite 開發伺服器運行在 5173 端口
+```
+
+### 兩者的差異對比
+
+| 項目 | `pnpm run build` | `pnpm run dev` |
+|------|-----------------|---------------|
+| **Dockerfile 指令** | `RUN pnpm run build` | `CMD ["pnpm", "dev"]` |
+| **執行時機** | 構建映像檔時 | 容器啟動時 |
+| **對應 Docker 指令** | `docker build` | `docker start` / `docker run` |
+| **執行階段** | `build` 階段 | `development` 階段 |
+| **目的** | 產生生產構建產物 | 啟動開發伺服器 |
+| **產物** | `dist/` 目錄 | 運行中的開發伺服器 |
+| **是否會持續運行** | ❌ 執行完即結束 | ✅ 持續運行直到容器停止 |
+
+### 完整執行流程對照
+
+#### 開發環境（使用 development 階段）
+
+**完整流程（`docker compose up --build` 實際執行的所有步驟）**
+
+```bash
+# 1. 構建映像檔
+docker build --target development
+  ↓
+執行 RUN 指令（安裝依賴、複製檔案等）
+  ↓
+映像檔構建完成（包含 CMD ["pnpm", "dev"]）
+
+# 2. 建立網路（如果不存在）
+docker network create sen-ba-li-18-docker_default
+
+# 3. 創建容器（但尚未啟動）
+docker create --name sen-ba-li-18-dev ...
+
+# 4. 啟動容器
+docker start sen-ba-li-18-dev
+  ↓
+執行 CMD ["pnpm", "dev"]
+  ↓
+執行 pnpm dev → vite
+  ↓
+Vite 開發伺服器運行
+
+# 5. 附加到輸出（顯示日誌）
+docker attach sen-ba-li-18-dev
+```
+
+**簡化版本（核心流程）**：
+```bash
+# 1. 構建映像檔
+docker build --target development --file Dockerfile .
+  ↓
+映像檔構建完成（包含 CMD ["pnpm", "dev"]）
+
+# 2. 啟動容器
+docker start sen-ba-li-18-dev
+  ↓
+執行 CMD ["pnpm", "dev"]
+  ↓
+執行 pnpm dev → vite
+  ↓
+Vite 開發伺服器運行
+```
+
+**注意**：所有 `docker build` 命令都需要構建上下文（最後的 `.`），這是必需的參數。
+
+**總結**：
+- ✅ `docker compose up --build` 確實會執行構建和啟動容器的核心流程
+- ✅ 但還包括建立網路、創建容器、附加輸出等額外步驟
+- ✅ 這些額外步驟是 Docker Compose 自動處理的，讓整個過程更簡單
+
+#### 生產環境（使用 production 階段）
+
+**執行指令**：
+```bash
+docker compose --profile production up --build
+```
+
+**完整流程**：
+
+```bash
+# 1. 構建映像檔（包含 build 階段）
+docker build --target build --file Dockerfile .
+  ↓
+執行 RUN pnpm run build（第 68 行）
+  ↓
+產生 dist/ 目錄
+
+# 2. 構建 production 階段
+docker build --target production --file Dockerfile .
+  ↓
+從 build 階段複製 dist/ 到 nginx
+
+# 3. 建立網路（如果不存在）
+docker network create sen-ba-li-18-docker_default
+
+# 4. 創建容器
+docker create --name sen-ba-li-18-prod ...
+
+# 5. 啟動容器
+docker start sen-ba-li-18-prod
+  ↓
+執行 CMD ["nginx", "-g", "daemon off;"]
+  ↓
+nginx 提供靜態檔案服務
+```
+
+**說明**：
+- `--profile production`：只啟動帶有 `profiles: - production` 標籤的服務
+- `--build`：在啟動前先構建映像檔
+- 生產環境會自動構建 `build` 階段（執行 `pnpm run build`），然後構建 `production` 階段
+
+**等價的手動指令序列**：
+```bash
+# 1. 構建映像檔（會自動構建 build 和 production 階段）
+docker build \
+  --file Dockerfile \
+  --target production \
+  --tag sen-ba-li-18-docker-app-prod:latest \
+  .
+
+# 2. 建立網路（如果不存在）
+docker network inspect sen-ba-li-18-docker_default >/dev/null 2>&1 || \
+  docker network create sen-ba-li-18-docker_default
+
+# 3. 創建容器
+docker create \
+  --name sen-ba-li-18-prod \
+  --network sen-ba-li-18-docker_default \
+  --publish 80:80/tcp \
+  --restart unless-stopped \
+  sen-ba-li-18-docker-app-prod:latest
+
+# 4. 啟動容器
+docker start sen-ba-li-18-prod
+```
+
+### 重要概念
+
+1. **RUN vs CMD**：
+   - `RUN`：在構建映像檔時執行，執行完即結束
+   - `CMD`：在容器啟動時執行，通常會持續運行
+
+2. **構建時 vs 運行時**：
+   - 構建時：執行 `docker build` 的過程
+   - 運行時：容器啟動後的執行過程
+
+3. **階段選擇**：
+   - `--target development`：使用 development 階段，包含 `CMD ["pnpm", "dev"]`
+   - `--target build`：使用 build 階段，包含 `RUN pnpm run build`
+   - `--target production`：使用 production 階段，使用 nginx 提供服務
 
 ## 執行時間線
 
@@ -424,6 +662,109 @@ docker compose up -d --build
 - `-d` 表示背景執行（detached mode）
 - 不會執行 `docker attach`
 - 容器在背景運行
+
+### docker compose --profile production up --build（生產環境）
+
+```bash
+docker compose --profile production up --build
+```
+
+**說明**：
+- `--profile production`：只啟動帶有 `profiles: - production` 標籤的服務
+- 會構建 `production` 階段，自動包含 `build` 階段的構建
+- 啟動 nginx 容器提供靜態檔案服務
+- 端口映射為 `80:80`
+
+**完整流程**：
+1. 構建 `build` 階段（執行 `pnpm run build`，產生 `dist/`）
+2. 構建 `production` 階段（複製 `dist/` 到 nginx）
+3. 建立網路
+4. 創建並啟動容器
+5. nginx 開始提供服務
+
+## 常見問題
+
+### 為什麼執行 `docker build --target build` 後主機上沒有 `dist/` 目錄？
+
+**原因**：
+- `docker build` 只會構建映像檔，不會將容器內的檔案複製回主機
+- `dist/` 目錄是在構建過程中的臨時容器內產生的
+- 構建完成後，`dist/` 會包含在映像檔中，但不會自動出現在主機上
+
+**解決方案**：
+
+#### 方法一：從映像檔中提取檔案（推薦，跨平台）
+
+```bash
+# 1. 構建映像檔
+docker build --target build --file Dockerfile . -t my-app:build
+
+# 2. 創建臨時容器並複製 dist/ 到主機
+docker create --name temp-container my-app:build
+docker cp temp-container:/app/dist ./dist
+docker rm temp-container
+```
+
+**說明**：此方法在所有平台（Windows、Linux、Mac）上都能正常運作。
+
+#### 方法二：使用 docker run 掛載卷
+
+**Linux/Mac**：
+```bash
+# 1. 構建映像檔
+docker build --target build --file Dockerfile . -t my-app:build
+
+# 2. 運行容器並掛載當前目錄
+docker run --rm -v "$(pwd)/dist:/app/dist" my-app:build sh -c "pnpm run build"
+```
+
+**Windows (PowerShell)**：
+```powershell
+# 1. 構建映像檔
+docker build --target build --file Dockerfile . -t my-app:build
+
+# 2. 運行容器並掛載當前目錄（使用絕對路徑）
+docker run --rm -v "${PWD}/dist:/app/dist" my-app:build sh -c "pnpm run build"
+```
+
+**Windows (CMD)**：
+```cmd
+# 1. 構建映像檔
+docker build --target build --file Dockerfile . -t my-app:build
+
+# 2. 運行容器並掛載當前目錄（使用 %CD%）
+docker run --rm -v "%CD%\dist:/app/dist" my-app:build sh -c "pnpm run build"
+```
+
+**注意**：
+- Windows 需要使用絕對路徑或環境變數
+- PowerShell 使用 `${PWD}` 或 `$PWD`
+- CMD 使用 `%CD%`
+- 確保 `dist` 目錄存在，或 Docker 會自動創建
+
+#### 方法三：直接在主機上構建（最簡單）
+
+```bash
+# 如果只是需要 dist/ 目錄，直接在主機上執行
+pnpm run build
+```
+
+#### 方法四：使用 Docker Compose 構建並提取
+
+```bash
+# 1. 構建映像檔
+docker compose build app-prod
+
+# 2. 從生產映像檔中提取
+docker create --name temp-prod sen-ba-li-18-docker-app-prod:latest
+docker cp temp-prod:/usr/share/nginx/html ./dist
+docker rm temp-prod
+```
+
+**說明**：
+- 方法一和方法二適合需要從 Docker 構建中提取檔案的情況
+- 方法三最簡單，適合開發時快速構建
+- 方法四適合從生產映像檔中提取最終產物
 
 ## 總結
 
