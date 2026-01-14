@@ -20,6 +20,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - VITE_DEV_PORT=${VITE_DEV_PORT:-5173}  # 傳遞端口設定給容器內的 Vite
     stdin_open: true  # 保持標準輸入開啟（用於互動式終端）
     tty: true  # 分配偽終端
     restart: unless-stopped

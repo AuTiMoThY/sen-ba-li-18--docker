@@ -47,7 +47,7 @@ export default defineConfig({
         },
         hmr: {
             // 熱模組替換配置
-            host: "localhost", // HMR 客戶端連接的主機
+            host: "localhost", // HMR 客戶端連接的主機（在 Docker 環境中，使用 localhost 即可）
             port: Number(process.env.VITE_DEV_PORT) || 5173 // HMR 端口，從環境變數讀取
         }
     }
