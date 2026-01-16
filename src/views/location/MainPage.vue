@@ -2,7 +2,7 @@
 import Nav from "@/components/nav/Nav.vue";
 </script>
 <template>
-    <div id="location-Page" class="page-wrapper">
+    <div id="location-main" class="page-wrapper">
         <router-view></router-view>
         <Nav />
     </div>

@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     FadeIn: typeof import('./src/components/transition/FadeIn.vue')['default']
     FullScreen: typeof import('./src/components/fullscreen/FullScreen.vue')['default']
+    ImageZoomViewer: typeof import('./src/components/image-zoom/ImageZoomViewer.vue')['default']
     Nav: typeof import('./src/components/nav/Nav.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

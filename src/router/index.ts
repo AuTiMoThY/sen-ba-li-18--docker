@@ -49,6 +49,11 @@ const router = createRouter({
 
         },
         {
+            path: "/building/floor",
+            name: "building-floor",
+            component: () => import("@/views/building/FloorPage.vue")
+        },
+        {
             path: "/method",
             name: "method",
             component: () => import("@/views/method/MainPage.vue"),

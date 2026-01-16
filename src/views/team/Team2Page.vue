@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { baseUrl } from "@/config/constants";
+const baseUrl = import.meta.env.BASE_URL;
+// const title = "大師團隊";
 </script>
 <template>
     <main id="team-2-page" class="page-main">
         <img :src="`${baseUrl}images/temp-bg.jpg`" alt="" />
-        <h1 class="">大師團隊</h1>
     </main>
 </template>
 <style lang="scss" scoped>

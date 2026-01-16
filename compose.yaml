@@ -10,8 +10,8 @@ services:
         VITE_DEV_PORT: ${VITE_DEV_PORT:-5173}  # 從 .env 讀取端口設定
     container_name: sen-ba-li-18-dev
     ports:
-      - "${VITE_DEV_PORT:-5173}:${VITE_DEV_PORT:-5173}"  # 映射 Vite 開發伺服器端口（從 .env 讀取）
-      # 注意：Docker Desktop 可能只顯示 http://localhost:5173
+      - "0.0.0.0:${VITE_DEV_PORT:-5173}:${VITE_DEV_PORT:-5173}"  # 映射 Vite 開發伺服器端口（明確綁定到所有網路介面，允許區網訪問）
+      # 注意：Docker Desktop 可能只顯示 http://localhost:5173，但實際上已綁定到 0.0.0.0
     volumes:
       # 掛載專案檔案以實現熱重載
       - .:/app

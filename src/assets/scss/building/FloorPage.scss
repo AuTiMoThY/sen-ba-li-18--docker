@@ -1,0 +1,15 @@
+@use "@/assets/scss/config" as *;
+@use "@/assets/scss/functions/calc" as *;
+
+#floor-main {
+    background: linear-gradient(to bottom, #071e4e, #13497f);
+
+    .page-main {
+        display: grid;
+        grid-template-columns: calc-vw(500, 1920) calc-vw(1323, 1920) 1fr;
+    }
+
+    .floor-left {
+        // width: calc-vw(500, 1920);
+    }
+}

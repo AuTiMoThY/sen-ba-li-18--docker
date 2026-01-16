@@ -4,7 +4,7 @@ import { baseUrl } from "@/config/constants";
 const fullRef = ref<HTMLElement | null>(null);
 const emits = defineEmits(["home-Animation"]);
 const handleClick = () => {
-    screenfull.request();
+    // screenfull.request();
     fullRef.value?.classList.add("js-hidden");
     emits("home-Animation");
 };

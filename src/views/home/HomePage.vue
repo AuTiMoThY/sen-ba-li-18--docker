@@ -3,20 +3,15 @@ import screenfull from "screenfull";
 import { gsap } from "gsap";
 import FullScreen from "@/components/fullscreen/FullScreen.vue";
 import { navLink } from "@/components/nav/navLink";
-import { useHomeWaveCanvas } from "./useHomeWaveCanvas";
-import { baseUrl } from "@/config/constants";
+import { useHomeWaveThree } from "./useHomeWaveThree";
 
 const fullScreenRef = ref<InstanceType<typeof FullScreen> | null>(null);
 const skipRef = ref<HTMLElement | null>(null);
 
-
 const homeInRef = ref<HTMLElement | null>(null);
 const homeContentTitleRef = ref<HTMLElement | null>(null);
 const navItemsRef = ref<HTMLElement | null>(null);
-// @ts-expect-error - 這些 ref 在模板中使用（第 55、59 行），但 linter 無法識別
-const { homeWaveCanvasRef, homeWaveCanvasBackRef } = useHomeWaveCanvas();
 const animationStart = ref(true);
-
 
 let homeTl = gsap.timeline();
 const homeAnimation = () => {
@@ -40,14 +35,19 @@ const homeAnimation = () => {
         .to(
             homeInRef.value,
             {
-                maskPosition: "50% 40%",
+                // maskPosition: "50% 40%",
+                opacity: 1,
                 duration: 2
             },
             "<0.25"
         )
-        .call(() => {
-            homeContentTitleRef.value?.classList.add("ani-start");
-        }, undefined, "<")
+        .call(
+            () => {
+                homeContentTitleRef.value?.classList.add("ani-start");
+            },
+            undefined,
+            "<"
+        )
         .fromTo(
             homeContentTitleRef.value,
             {
@@ -72,15 +72,11 @@ const homeAnimation = () => {
                 opacity: 1,
                 yPercent: 0,
                 duration: 1.5,
-                stagger: {
-                    amount: 0.3,
-                    from: "center"
-                },
+                stagger: 0.3,
                 ease: "power4.Out"
             },
             ">-0.8"
-        )
-
+        );
 };
 const handleClose = () => {
     if (screenfull.isEnabled) {
@@ -88,7 +84,7 @@ const handleClose = () => {
     }
 };
 
-const maskImageUrl = `${baseUrl}images/home/mask-img.svg`;
+const baseUrl = import.meta.env.BASE_URL;
 const logoMaskImageUrl = `url(${baseUrl}images/logo.png)`;
 
 // 為 navLink 添加 pathName 值
@@ -96,44 +92,105 @@ const navLinkWithPathName = computed(() => {
     return navLink.map((item) => {
         return {
             ...item,
-            pathName: item.pathName || (item.child && item.child[0]?.pathName) || ""
+            pathName:
+                item.pathName || (item.child && item.child[0]?.pathName) || ""
         };
     });
+});
+
+// 使用 Three.js 波浪效果
+const {
+    homeWaveCanvasRef,
+    setEffect,
+    setSpeed,
+    setWaveCount,
+    setPeriodMultiplier,
+    setAmplitudeMultiplier,
+    setGlowIntensity
+} = useHomeWaveThree();
+
+const controls = reactive({
+    effect: "gentle",
+    speed: 0.7,
+    waveCount: 15,
+    period: 300,
+    amplitude: 60,
+    glow: 2
+});
+
+const effectOptions = {
+    gentle: "優雅緩流",
+    smooth: "絲綢波動",
+    ocean: "海洋韻律",
+    ripple: "漣漪擴散",
+    aurora: "極光流動"
+};
+
+watch(
+    () => controls.effect,
+    (val) => setEffect(val as keyof typeof effectOptions),
+    { immediate: true }
+);
+
+watch(
+    () => controls.speed,
+    (val) => setSpeed(val),
+    { immediate: true }
+);
+
+watch(
+    () => controls.waveCount,
+    (val) => setWaveCount(val),
+    { immediate: true }
+);
+
+watch(
+    () => controls.period,
+    (val) => setPeriodMultiplier(val),
+    { immediate: true }
+);
+
+watch(
+    () => controls.amplitude,
+    (val) => setAmplitudeMultiplier(val),
+    { immediate: true }
+);
+
+watch(
+    () => controls.glow,
+    (val) => setGlowIntensity(val),
+    { immediate: true }
+);
+
+// 確保模板引用的 canvas ref 被追蹤
+watchEffect(() => {
+    void homeWaveCanvasRef.value;
 });
 </script>
 <template>
     <main id="home">
         <div class="home-bg">
-            <video
-                class="home-bg-video"
-                :src="`${baseUrl}images/home/home-bg-video.mp4`"
-                autoplay
-                muted
-                loop></video>
             <img :src="`${baseUrl}images/home/home-bg.jpg`" alt="home-bg" />
         </div>
         <FullScreen ref="fullScreenRef" @home-Animation="homeAnimation" />
 
-        <div
-            ref="homeInRef"
-            class="home-in"
-            :style="`mask-image: url(${maskImageUrl})`">
+        <div ref="homeInRef" class="home-in">
             <div ref="homeWaveRef" class="home-wave">
                 <div class="home-wave-container">
-                    <!-- 後景 canvas（反向，速度慢，模糊） -->
-                    <canvas
-                        ref="homeWaveCanvasBackRef"
-                        class="home-wave-canvas home-wave-canvas-back"></canvas>
-                    <!-- 前景 canvas（正向，速度快） -->
-                    <canvas
-                        ref="homeWaveCanvasRef"
-                        class="home-wave-canvas home-wave-canvas-front"></canvas>
+                    <div class="wave-canvas">
+                        <canvas
+                            ref="homeWaveCanvasRef"
+                            class="home-wave-canvas"></canvas>
+                    </div>
                 </div>
             </div>
 
             <div class="home-content">
                 <div class="home-content-inner">
-                    <div ref="homeContentTitleRef" class="home-content-title" :style="`mask-image: ${logoMaskImageUrl}`">
+                    <div
+                        ref="homeContentTitleRef"
+                        class="home-content-title"
+                        :style="`mask-image: ${logoMaskImageUrl}`">
                         <img
                             :src="`${baseUrl}images/logo.png`"
                             alt="home-in-content-title" />

@@ -54,7 +54,7 @@ copy .env.example .env
 ### 3、啟動開發環境
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 **預期結果**：
