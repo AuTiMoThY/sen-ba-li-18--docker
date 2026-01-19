@@ -6,10 +6,83 @@
 
     .page-main {
         display: grid;
-        grid-template-columns: calc-vw(500, 1920) calc-vw(1323, 1920) 1fr;
+        grid-template-columns: calc-vw(500, 1920) calc-vw(1920 - 500, 1920);
     }
 
     .floor-left {
         // width: calc-vw(500, 1920);
+    }
+
+    .floor-col-inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        padding-bottom: var(--nav-height);
+
+        .img-box {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    .floor-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: calc-vw(32, 1920);
+
+        .subtitle-box {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: calc-vw(14, 1920);
+
+            border-left: 1px solid #ece17e;
+            border-right: 1px solid #ece17e;
+            padding-inline: calc-vw(40, 1920);
+            // &::before {
+            //     content: "";
+            //     display: block;
+            //     width: 1%;
+            //     height: 100%;
+            //     background-color: #ece17e;
+            // }
+        }
+        .title {
+            color: #ece17e;
+            font-size: calc-vw(72, 1920);
+            letter-spacing: calc-ls(50);
+            line-height: 1;
+            font-weight: 400;
+        }
+        .subtitle {
+            color: #ece17e;
+            font-size: calc-vw(32, 1920);
+            letter-spacing: calc-ls(150);
+            line-height: 1;
+            font-weight: 600;
+        }
+        .small {
+            color: #fff;
+            font-size: calc-vw(21, 1920);
+            letter-spacing: calc-ls(75);
+            line-height: 1;
+            font-weight: 400;
+        }
+    }
+
+    .floor-pattern {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: calc-vw(666.66, 1920);
+        img {
+            width: 100%;
+            aspect-ratio: 666.66 / 522.64;
+        }
     }
 }

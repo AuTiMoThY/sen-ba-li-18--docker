@@ -1,0 +1,123 @@
+@use "@/assets/scss/config" as *;
+@use "@/assets/scss/functions/calc" as *;
+
+.image-zoom-viewer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    // background: #000;
+    touch-action: none;
+
+}
+
+.image-zoom-container {
+    position: relative;
+    width: relative-percentage(1320, 1920 - 500);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    user-select: none;
+
+    &.is-dragging {
+        cursor: grabbing;
+    }
+    .img-box {
+        position: relative;
+    }
+
+    .text {
+        position: absolute;
+        right: 0;
+        bottom: calc-vw(32, 1920);
+        color: #fff;
+        font-size: max(12px, calc-vw(16, 1920));
+        letter-spacing: calc-ls(100);
+    }
+}
+
+.zoom-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+    transition: transform 0.1s ease-out;
+    will-change: transform;
+}
+
+.zoom-controls {
+    position: absolute;
+    bottom: calc-vw(115, 1920);
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 10;
+}
+
+.zoom-btn {
+    width: calc-vw(48, 1920);
+    height: calc-vw(48, 1920);
+    border: none;
+    // border-radius: 8px;
+    // background: rgba(255, 255, 255, 0.9);
+    background-color: transparent;
+    backdrop-filter: blur(10px);
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover:not(:disabled) {
+        // background: rgba(255, 255, 255, 1);
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    svg {
+        width: 98%;
+        height: 98%;
+    }
+
+    &.zoom-reset {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+// 平板和手機適配
+@media (max-width: 768px) {
+    .zoom-controls {
+        top: 0.5rem;
+        right: 0.5rem;
+        gap: 0.25rem;
+    }
+
+    .zoom-btn {
+        width: 44px;
+        height: 44px;
+
+        svg {
+            width: 18px;
+            height: 18px;
+        }
+    }
+}

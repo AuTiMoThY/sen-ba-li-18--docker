@@ -61,5 +61,5 @@ const floorList = [
     </div>
 </template>
 <style scoped>
-@import "@/assets/scss/building/MainPage.scss";
+@import "../../assets/scss/building/MainPage.scss";
 </style>
